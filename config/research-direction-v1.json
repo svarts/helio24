@@ -1,0 +1,55 @@
+{
+  "id": "research-direction-v1",
+  "status": "direction_selected_execution_protocol_pending",
+  "evidence": "artifacts/research_synthesis_20261031_r1/report.json",
+  "evidence_sha256": "94a54e9f3cf7d651c491c8a431c413aced8e71fc8d97c3107a7ac2979cdb2c6f",
+  "selected_direction": "Raw chronological magnetic sequence representation with a small causal temporal convolution model",
+  "hypothesis": "The order of past measurements may contain discrimination lost by mean/std/last/delta and longer-history summaries. This is untested, not demonstrated.",
+  "input_contract": {
+    "history_hours": 12,
+    "cadence_minutes": 12,
+    "steps": 60,
+    "measurement_channels": 24,
+    "missing_mask_channels": 24,
+    "forecast_boundary": "Strictly before forecast; UTC/TAI verified",
+    "population": "Frozen V2 forecast keys retained; missing histories padded/masked, never silently dropped",
+    "preflight": "Reconstruct original 96 summaries from the raw sequence and explain every discrepancy; verify source hashes, cadence and clocks before fitting"
+  },
+  "controls": [
+    "Frozen original annual 96-feature ensemble",
+    "Shorter-training 96-feature control identified in calibration-windows-v1; secondary control because training history differs",
+    "Same small temporal model on label-independent per-window permutations of interior timesteps; first and last observations preserved, all measurement/mask channels permuted together"
+  ],
+  "permutation_scope": "Preserves unordered values and first/last summaries; cannot isolate measurement-order effects from the ordering of missingness. Do not provide original timestep IDs to the shuffled control.",
+  "budget": {
+    "architectures": 1,
+    "parameter_cap": 50000,
+    "max_epochs_per_fit": 20,
+    "seeds": [
+      24,
+      42,
+      97
+    ],
+    "neural_arms": 2,
+    "completed_annual_folds": 7,
+    "maximum_neural_fits": 42,
+    "pilot": "Runtime/storage/causality smoke check only; no validation-based architecture search"
+  },
+  "selection": "Architecture, optimizer and stopping rule must be frozen in execution protocol after data/resource checks; do not choose best outer year or seed. Report seed variation and a predeclared seed aggregation.",
+  "evaluation": "Original annual folds; all new main arms share training/calibration/evaluation rows. Early inner training folds only for any development selection, never outer evaluation labels. Earlier outer years are already inspected development, not fresh test.",
+  "threshold": "Calibration-selected target recall >=0.95 transferred unchanged; no evaluation-reselected threshold as main result.",
+  "success": "Higher precision and fewer false-positive windows at recall >=0.95 per comparable positive year, plus probability/ranking and paired-HARP uncertainty checks. Consistent improvement over order-destroyed control required to support ordering hypothesis. No automatic promotion.",
+  "parked": [
+    "Further small calibration-duration, probability-pooling or weight grids without a new hypothesis",
+    "Flare-history features until report-availability and region-association provenance are verified",
+    "Alert suppression as a substitute for window-level precision improvement",
+    "Large Transformer or broad architecture search before the bounded sequence pilot"
+  ],
+  "reserved_test_accessed": false,
+  "limitations": [
+    "No guarantee sequence modeling improves precision; limited independent positive regions remain.",
+    "Reference paper is general sequence modeling, not evidence of solar-flare performance.",
+    "Full architecture/training implementation and raw-sequence materialization are not completed."
+  ],
+  "method_reference": "https://arxiv.org/abs/1803.01271v2"
+}
