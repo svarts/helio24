@@ -1,0 +1,42 @@
+{
+  "id": "recency-weighted-v1",
+  "status": "execution_contract_frozen",
+  "baseline_artifact": "artifacts/walk_forward_20261028_r1",
+  "baseline_report_sha256": "6f11b3208dcad94ae5c5898ad02aa976b8ea3e351b01f2bf1fe2a0745597a69c",
+  "base_protocol": "config/walk-forward-v1.json",
+  "base_protocol_sha256": "7c48fd7381456bee22f928b44da537880f06b4d70fd2b38b822279474c616303",
+  "evidence": "artifacts/calibration_score_audit_20261030_r1/report.json",
+  "evidence_sha256": "37d4773a865824d034d4701b220686575820918b4461e9c33f7c02ef4e0414dd",
+  "evaluation_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "candidates": {
+    "recency_2y": 2.0,
+    "recency_5y": 5.0
+  },
+  "weighting": "2 ** (-age_years / half_life_years); age from forecast_time to start of outer calibration year, with 365.25 days/year. Normalize to mean 1 separately in each training class, preserving both class weight totals.",
+  "training": "Replace only XGBoost in fixed 0.45 logistic / 0.55 XGBoost ensemble; unchanged 96 features and base hyperparameters; all training rows retained.",
+  "calibration": "Each tree refits sigmoid on the original calibration year; ensemble threshold chosen there at recall >=0.95 and frozen before evaluation.",
+  "required_recall": 0.95,
+  "selection": "No evaluation-based winner selection or half-life tuning. Report both fixed candidates against baseline per year.",
+  "acceptance": "For each fixed candidate require higher precision, recall >=0.95, AP no lower, Brier/log loss no higher in every comparable positive year. Complete original coverage required. No automatic promotion.",
+  "bootstrap": {
+    "draws": 1000,
+    "seed": 24
+  },
+  "reserved_test_accessed": false,
+  "limitations": [
+    "Adaptive retrospective development informed by past evaluation findings; not independent testing.",
+    "Temporal weighting may reduce effective information from old positive regions and worsen recall or calibration.",
+    "Within-class normalization controls class-weight totals but does not remove distribution shift or prove its cause."
+  ]
+}
