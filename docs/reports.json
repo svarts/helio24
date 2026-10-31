@@ -229,5 +229,12 @@
     "source_sha256": "08eb02870e7520045e63b67d16b70b7145feeea58ede61edddd1e6da5ab9ec88",
     "en": "research-synthesis-20261031.md",
     "tr": "research-synthesis-20261031.tr.md"
+  },
+  {
+    "id": "hale-replay-20261031",
+    "source_language": "en",
+    "source_sha256": "53ef23aec355d31ababbf059a36689bc9ef8e85741b6e95378c8754eac401123",
+    "en": "hale-replay-20261031.md",
+    "tr": "hale-replay-20261031.tr.md"
   }
 ]
