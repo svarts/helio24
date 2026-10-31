@@ -85,3 +85,5 @@ historical evidence. JSON/CSV fields, model identifiers and commands retain
 their technical names. Numeric tables retain the source document's number notation.
 
 | Deneylerin toplu değerlendirmesi ve araştırma yönü / Experiment synthesis and research direction | [Türkçe](research-synthesis-20261031.tr.md) | [English](research-synthesis-20261031.md) |
+
+| Zaman serisi hazırlığı ve TCN ön kontrolü / Sequence preparation and TCN preflight | [Türkçe](sequence-readiness-20261101.tr.md) | [English](sequence-readiness-20261101.md) |

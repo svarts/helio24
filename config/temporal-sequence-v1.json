@@ -1,0 +1,118 @@
+{
+  "id": "temporal-sequence-v1",
+  "status": "design_frozen_runner_pending",
+  "direction": "config/research-direction-v1.json",
+  "direction_sha256": "31eda27d68bb1b63e4047027f7c20acf3adfc9b1e9aa4783b758c4ecb59f04cb",
+  "base_protocol": "config/walk-forward-v1.json",
+  "base_protocol_sha256": "7c48fd7381456bee22f928b44da537880f06b4d70fd2b38b822279474c616303",
+  "baseline_artifact": "artifacts/walk_forward_20261028_r1",
+  "baseline_report_sha256": "6f11b3208dcad94ae5c5898ad02aa976b8ea3e351b01f2bf1fe2a0745597a69c",
+  "sequence_source": "artifacts/sequences_20261101_r2",
+  "sequence_report_sha256": "67908d7c06a18e0d4646dcaa5c9e503864e5d19b9673839550318cf5bf3f8ac8",
+  "smoke": "artifacts/temporal_smoke_20261101_r1/report.json",
+  "smoke_sha256": "5568381fa9e0774101a800d1679aa30dce78f0d934495303839a714aff5636e4",
+  "evaluation_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "population": "Exact original annual_fold rows, ordering and audit; HARP separation and observation/prediction boundary purging. Preserve zero-positive evaluation 2018; skip original non-evaluable 2019-2021 folds. No outcome-based drops.",
+  "input": {
+    "steps": 60,
+    "cadence_minutes": 12,
+    "history_hours": 12,
+    "measurement_channels": 24,
+    "missing_channels": 24,
+    "stored_dtype": "float32"
+  },
+  "preprocessing": {
+    "transform": "sign(x)*log1p(abs(x))",
+    "fit": "Training windows only, counting repeated observations as they occur in those windows; finite values only; float64 channel sums and population variance. One scaler shared by both arms and all seeds within a fold.",
+    "standardization": "Subtract training mean and divide by population std; std below 1e-6 becomes 1. Clip scaled finite values to [-8,8]. Missing values become 0 after scaling; append bool missing masks cast to float32. Abort if any channel has no finite training values."
+  },
+  "architecture": {
+    "implementation": "helio24/temporal_model.py",
+    "implementation_sha256": "4b012f7358c781b2dcf97c87bacbe67210281d1481cf9a8c2b800f71b8476eff",
+    "blocks": 5,
+    "width": 32,
+    "kernel": 3,
+    "dilations": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "dropout": 0.1,
+    "activation": "ReLU",
+    "residual": "Identity except first 48-to-32 channel projection",
+    "output": "Scalar logit at final timestep",
+    "parameters": 18657,
+    "receptive_field_steps": 63
+  },
+  "arms": [
+    "chronological",
+    "shuffled_interior"
+  ],
+  "shuffle": "For each seed and forecast key derive seed from first 8 bytes of SHA-256 of UTF-8 f\"{seed}|{harp}|{forecast_time.isoformat()}\" interpreted little-endian, with forecast_time normalized to UTC. numpy.default_rng permutes indices 1..58, preserving 0 and 59. Move all measurements and masks together after shared preprocessing. Fix permutation across epochs, independent of labels and batch order; apply to train, calibration and evaluation. Do not provide original timestep IDs.",
+  "seeds": [
+    24,
+    42,
+    97
+  ],
+  "training": {
+    "epochs": 10,
+    "batch_size": 128,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "eps": 1e-08,
+    "loss": "BCEWithLogitsLoss with pos_weight=n_negative/n_positive from training rows; mean reduction",
+    "gradient_clip_norm": 1.0,
+    "batch_order": "Seeded permutation of training rows each epoch; no random split or class resampling; drop_last=False. Same batch order in paired arms.",
+    "stopping": "Fixed 10 epochs, final checkpoint only. Abort on nonfinite tensors/loss/gradients; no early stopping or outer-score inspection.",
+    "device": "cpu",
+    "threads": 4,
+    "determinism": "Seed numpy and torch at each fit; torch.use_deterministic_algorithms(True). No best-seed selection.",
+    "process_isolation": "Launch each torch fit/inference worker using a fresh Python subprocess (exec, not fork); no sklearn/XGBoost imports in worker. Exchange predictions/checkpoints through files. Calibration and bootstrap run in parent without importing torch."
+  },
+  "aggregation": "Equal mean of the three raw sigmoid probabilities per arm; fit one SigmoidCalibration on aggregated calibration-year predictions. Separately calibrate each seed and report its transferred metrics to describe seed variation, without choosing a seed.",
+  "calibration": "Existing SigmoidCalibration; select recall_threshold at >=0.95 on prior calibration year only; freeze before reading evaluation labels. No evaluation-reselected main threshold.",
+  "controls": [
+    "Original frozen annual ensemble, identical evaluation keys",
+    "Frozen shared_train_one_year control from calibration-windows experiment; report separately because its training history differs; require identical evaluation keys"
+  ],
+  "uncertainty": {
+    "draws": 1000,
+    "seed": 24,
+    "unit": "Paired HARP bootstrap within each evaluation year, with fixed thresholds. Compare each aggregate against incumbent and chronological against shuffled. Intervals do not include retraining uncertainty; report seed spread separately."
+  },
+  "success": "Each comparable positive year: precision strictly higher, FP strictly lower, recall >=0.95, AP no lower, Brier/log_loss no higher than original ensemble. Require complete original coverage. For ordering hypothesis also apply same comparisons against shuffled aggregate; disclose paired confidence intervals, no significance claim from point wins alone. No automatic promotion.",
+  "budget": {
+    "maximum_neural_fits": 42,
+    "architectures": 1,
+    "epochs_per_fit": 10,
+    "optimizer_steps_all_completed_folds": 1123680,
+    "synthetic_compute_hours_estimate": 18.307804155804867,
+    "estimate_limit": "CPU smoke extrapolation excludes loading, preprocessing, calibration, inference and bootstrap; not a runtime guarantee."
+  },
+  "reserved_test_accessed": false,
+  "limitations": [
+    "Repeatedly inspected development years are not independent final test.",
+    "Order control includes missingness chronology, not just physical magnetic evolution.",
+    "Architecture and training recipe are fixed by a bounded design, not selected for outer-year performance.",
+    "Runner integration must be verified against this contract before real-label fitting.",
+    "Torch-only smoke passed; mixed full-suite process crashed in native Conv1d. Root cause is unresolved; use isolated workers and fail on nonzero exit, never mask failures."
+  ]
+}

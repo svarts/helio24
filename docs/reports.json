@@ -236,5 +236,12 @@
     "source_sha256": "53ef23aec355d31ababbf059a36689bc9ef8e85741b6e95378c8754eac401123",
     "en": "hale-replay-20261031.md",
     "tr": "hale-replay-20261031.tr.md"
+  },
+  {
+    "id": "sequence-readiness-20261101",
+    "source_language": "en",
+    "source_sha256": "b3e188bf0d153061fd3b49954b6297dbbb898ee7f259958c642f3a9b72cb6c89",
+    "en": "sequence-readiness-20261101.md",
+    "tr": "sequence-readiness-20261101.tr.md"
   }
 ]
