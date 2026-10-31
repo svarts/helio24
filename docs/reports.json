@@ -215,5 +215,12 @@
     "source_sha256": "feb732c6fbe02a814828058658714abf00c9caf12bdcec98e3c0e217a30a1682",
     "en": "calibration-windows-20261030.md",
     "tr": "calibration-windows-20261030.tr.md"
+  },
+  {
+    "id": "recency-training-20261031",
+    "source_language": "en",
+    "source_sha256": "93a86585265969e55fb252d86b5b9c0f60d9e392b23400a051a66aabb46e58fe",
+    "en": "recency-training-20261031.md",
+    "tr": "recency-training-20261031.tr.md"
   }
 ]

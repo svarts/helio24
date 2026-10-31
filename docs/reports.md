@@ -50,6 +50,8 @@ their historical context; translation does not constitute a new evaluation.
 
 | Kalibrasyon süresi karşılaştırması / Calibration window comparison | [Türkçe](calibration-windows-20261030.tr.md) | [English](calibration-windows-20261030.md) |
 
+| Zamansal eğitim ağırlıkları / Temporal training weights | [Türkçe](recency-training-20261031.tr.md) | [English](recency-training-20261031.md) |
+
 ## HTML çıktıları / HTML editions
 
 ```sh
